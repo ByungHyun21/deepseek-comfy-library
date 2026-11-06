@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "ComfyUI gallery",
+    "description": "Adds a gallery of images, video, and music made with ComfyUI, an installed-model list, and tools to generate, search, and import."
+  }
+}
