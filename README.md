@@ -93,6 +93,7 @@ SSH 는 미리 키 인증이 되어 있어야 한다. 확인: `ssh yoon@192.168.
 | `comfy_job_status` | 대기/실행/완료 확인. 로컬 모드면 결과를 갤러리에 저장, 원격 모드면 파일명·뷰 URL만 보고(사본 없음) |
 | `comfy_library_search` | 프롬프트·모델·파일명으로 검색, `kind` 로 이미지/비디오/음악 필터 |
 | `comfy_library_import` | 갤러리 항목(`id`) 또는 방금 끝난 작업(`promptId`)을 프로젝트 경로로 내려받기 |
+| `comfy_library_delete` | 갤러리 항목 삭제(인덱스 tombstone + 미디어 제거). 원격 모드면 원격 호스트에서 지운다 |
 
 에이전트는 `comfy_generate` → `comfy_job_status` → `comfy_library_import` 순서로
 새 프로젝트에 쓸 이미지를 만들고 가져올 수 있다. 원격 모드에서는 `promptId` 만으로도

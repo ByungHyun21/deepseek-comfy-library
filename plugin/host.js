@@ -317,6 +317,13 @@ export function apply(ctx, config) {
       .finally(() => { sync.syncing = false; });
   };
 
+  /* 로컬 저장 모드에서만: 아무도 갤러리를 열지 않아도 새 결과를 주기적으로 흡수해
+     이 호스트의 라이브러리를 정본으로 유지한다. 원격 모드는 대상이 아니다. */
+  if (!remote && readField(config.autoSync, true) !== false) {
+    const timer = setInterval(() => maybeSync(baseUrl()), SYNC_COOLDOWN_MS);
+    ctx.effect(() => () => clearInterval(timer), "deepseek-comfy-library: auto sync timer");
+  }
+
   const statusBody = async (base) => {
     const status = await probe(base, timeout());
     return {
@@ -681,6 +688,29 @@ export function apply(ctx, config) {
       output: { schema: { type: "object" }, render: renderText },
       async execute(args) {
         return importItem(args);
+      },
+    });
+
+    register({
+      name: "comfy_library_delete",
+      description: remote
+        ? "Delete one gallery item from the remote library host: the index entry becomes a tombstone and the media file is removed there. Use comfy_library_search first to get the id."
+        : "Delete one gallery item from the gallery: the index entry becomes a tombstone and the media file is removed. Use comfy_library_search first to get the id.",
+      parameters: {
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          id: { type: "string", description: "Gallery item id from comfy_library_search." },
+        },
+        required: ["id"],
+      },
+      output: { schema: { type: "object" }, render: renderText },
+      async execute(args) {
+        const id = String(args.id ?? "").trim();
+        if (id === "") throw new ValidationError("갤러리 항목 id 가 필요합니다.");
+        const removed = await store.remove(id);
+        if (!removed) throw new ValidationError("그 갤러리 항목을 찾지 못했습니다.");
+        return { removed: true, id, mode };
       },
     });
 
